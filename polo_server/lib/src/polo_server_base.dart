@@ -1,11 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:uuid/uuid.dart';
-
-part 'polo_client_base.dart';
-part 'polo_server_helper.dart';
+part of 'polo_server_helper.dart';
 
 /// Use `Polo.createServer()` to Create a Standalone Server
 class PoloServer {
@@ -69,7 +62,7 @@ class PoloServer {
   }
 
   void _handleClient(WebSocket webSocket) {
-    PoloClient client = PoloClient(webSocket);
+    PoloClient client = PoloClient._(webSocket);
     // On Client Connected
     _onConnect(client);
     // On Client Disconnected

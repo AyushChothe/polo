@@ -1,4 +1,4 @@
-part of 'polo_server_base.dart';
+part of 'polo_server_helper.dart';
 
 class PoloClient {
   final WebSocket webSocket;
@@ -6,9 +6,9 @@ class PoloClient {
   Map<String, void Function(dynamic)> callbacks = {};
   final Set<String> _rooms = {};
 
-  Function(PoloClient) _onDisconnectCallback = (webSocket) {};
+  void Function(PoloClient) _onDisconnectCallback = (poloClient) {};
 
-  PoloClient(this.webSocket) {
+  PoloClient._(this.webSocket) {
     id = Uuid().v4();
     _handleEvents();
   }

@@ -3,5 +3,4 @@
 /// More dartdocs go here.
 library polo_client;
 
-export 'src/polo_client_base.dart';
-
+export 'src/polo_client_helper.dart';

@@ -1,6 +1,6 @@
 name: polo_client
 description: A WebSocket Library written in Pure Dart.
-publish_to: pub.dev
+repository: https://github.com/AyushChothe/polo
 version: 0.0.1
 # homepage: https://www.example.com
 
@@ -8,7 +8,7 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 # dependencies:
-#   path: ^1.8.0
+# uuid: ^3.0.6
 
 dev_dependencies:
   lints: ^2.0.0
