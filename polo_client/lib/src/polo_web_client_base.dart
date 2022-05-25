@@ -1,14 +1,14 @@
-part of 'polo_client_helper.dart';
+part of 'polo_web_client_helper.dart';
 
 /// Use `Polo.connect()` to Connect to the `PoloServer`
-class PoloClient {
-  final io.WebSocket _webSocket;
+class PoloWebClient {
+  final html.WebSocket _webSocket;
   final Map<String, void Function(dynamic)> _callbacks = {};
 
   void Function() _onDisconnectCallback = () {};
   void Function() _onConnectCallback = () {};
 
-  PoloClient._(this._webSocket);
+  PoloWebClient._(this._webSocket);
 
   /// Sets onConnectCallback
   void onConnect(void Function() callback) => _onConnectCallback = callback;
@@ -31,7 +31,7 @@ class PoloClient {
 
   /// Sends message to the Server from Client
   void send(String event, dynamic data) {
-    _webSocket.add(jsonEncode({'event': event, 'data': data}));
+    _webSocket.sendString(jsonEncode({'event': event, 'data': data}));
   }
 
   /// Closes the connection to the `PoloServer`
@@ -41,13 +41,13 @@ class PoloClient {
 
   Future<void> _handleEvents() async {
     _onConnectCallback();
-    _webSocket.done.then((_) {
+    _webSocket.onClose.listen((event) {
       _onDisconnectCallback();
     });
     try {
       //Listen for Messages from Server
-      await for (dynamic message in _webSocket) {
-        final Map<String, dynamic> msg = jsonDecode(message);
+      await for (html.MessageEvent message in _webSocket.onMessage) {
+        final Map<String, dynamic> msg = jsonDecode(message.data);
         _emit(msg['event'], msg['data']);
       }
     } catch (e) {

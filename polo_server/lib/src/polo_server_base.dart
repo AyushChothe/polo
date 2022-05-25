@@ -8,7 +8,7 @@ class PoloServer {
 
   void Function() _onClose = () {};
 
-  Map<String, PoloClient> clients = {};
+  final Map<String, PoloClient> _clients = {};
 
   void Function(PoloClient client) _onConnectCallback = (client) {};
   void Function(PoloClient client) _onDisconnectCallback = (client) {};
@@ -27,7 +27,7 @@ class PoloServer {
   /// Get all rooms
   Set<String> get rooms {
     Set<String> allRooms = {};
-    for (PoloClient client in clients.values) {
+    for (PoloClient client in _clients.values) {
       allRooms.addAll(client._rooms);
     }
     return allRooms;
@@ -44,13 +44,13 @@ class PoloServer {
   }
 
   void _onConnect(PoloClient client) {
-    clients[client.id] = client;
+    _clients[client.id] = client;
     _onConnectCallback(client);
   }
 
   void _onDisconnect(PoloClient client) {
     client._onDisconnect((client) {
-      clients.remove(client.id);
+      _clients.remove(client.id);
       _onDisconnectCallback(client);
     });
   }
@@ -71,33 +71,44 @@ class PoloServer {
 
   /// Sends message to all Clients
   void send(String event, dynamic message) {
-    for (PoloClient client in clients.values) {
+    for (PoloClient client in _clients.values) {
       client.send(event, message);
     }
   }
 
   /// Sends message to a Client by Id
   void sendToClient(String clientId, String event, dynamic message) {
-    if (clients.containsKey(clientId)) {
-      clients[clientId]!.send(event, message);
+    if (_clients.containsKey(clientId)) {
+      _clients[clientId]!.send(event, message);
     }
   }
 
+  /// Sends message to a Room
   void sendToRoom(String room, String event, dynamic message) {
-    for (PoloClient client in clients.values) {
+    for (PoloClient client in _clients.values) {
       if (client._rooms.contains(room)) {
         client.send(event, message);
       }
     }
   }
 
+  /// Broadcast from a Client to all other Clients
+  void broadcastFrom(String clientId, String event, dynamic message) {
+    for (PoloClient client in _clients.values) {
+      if (client.id != clientId) {
+        client.send(event, message);
+      }
+    }
+  }
+
+  /// Closes the Server
   Future<void> close() async {
     if (_httpServer != null) {
       return _httpServer!.close(force: true);
     }
 
     await _sub.cancel();
-    await Future.wait(clients.values.map((e) => e.close()));
+    await Future.wait(_clients.values.map((e) => e.close()));
     _onClose();
   }
 }

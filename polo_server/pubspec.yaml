@@ -1,7 +1,7 @@
 name: polo_server
-description: A WebSocket Library written in Pure Dart.
+description: A WebSocket Library written in Pure Dart. Easy API for writing WebSocket based Apps or Games. Also Support for Flutter and Web.
 repository: https://github.com/AyushChothe/polo
-version: 0.0.1
+version: 0.0.2
 # homepage: https://www.example.com
 
 environment:

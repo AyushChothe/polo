@@ -1,15 +1,17 @@
 part of 'polo_server_helper.dart';
 
+/// `PoloClient` is used to handle Connected WebSocket
 class PoloClient {
-  final WebSocket webSocket;
-  late final String id;
+  final WebSocket _webSocket;
+  late final String _id;
+  String get id => _id;
   Map<String, void Function(dynamic)> callbacks = {};
   final Set<String> _rooms = {};
 
   void Function(PoloClient) _onDisconnectCallback = (poloClient) {};
 
-  PoloClient._(this.webSocket) {
-    id = Uuid().v4();
+  PoloClient._(this._webSocket) {
+    _id = Uuid().v4();
     _handleEvents();
   }
 
@@ -25,7 +27,7 @@ class PoloClient {
 
   /// Sends message to the Client from Server
   void send(String event, dynamic data) {
-    webSocket.add(jsonEncode({'event': event, 'data': data}).codeUnits);
+    _webSocket.add(jsonEncode({'event': event, 'data': data}));
   }
 
   /// Joins a Room
@@ -38,31 +40,27 @@ class PoloClient {
     _rooms.remove(room.trim());
   }
 
+  /// Closes the Client
   Future<void> close() async {
-    return webSocket.close();
+    return _webSocket.close();
   }
 
   void _handleEvents() async {
-    webSocket.done.then((_) {
+    _webSocket.done.then((_) {
       // emit('disconnect', this);
       _onDisconnectCallback(this);
     });
     onEvent("message", (message) => print(message.toString()));
     try {
       //Listen for Messages from Client
-      await for (dynamic message in webSocket) {
-        if (message is String) {
-          _emit("message", message);
-        } else if (message is List<int>) {
-          final Map<String, dynamic> msg =
-              jsonDecode(String.fromCharCodes(message));
-          _emit(msg['event'], msg['data']);
-        }
+      await for (dynamic message in _webSocket) {
+        final Map<String, dynamic> msg = jsonDecode(message);
+        _emit(msg['event'], msg['data']);
       }
     } catch (e) {
       print("Error: $e");
     } finally {
-      webSocket.close();
+      _webSocket.close();
     }
   }
 }
