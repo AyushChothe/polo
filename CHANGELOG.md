@@ -2,6 +2,7 @@
 
 - Web Support added
 - Server internal changes
+- Deno/TypeScript PoloClient Added
 
 ## 0.0.1
 

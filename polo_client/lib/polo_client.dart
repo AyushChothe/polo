@@ -1,6 +1,4 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
+/// PoloClient
 library polo_client;
 
 export 'src/polo_client_helper.dart';

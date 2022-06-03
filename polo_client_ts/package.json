@@ -1,0 +1,15 @@
+{
+  "name": "polo_client_ts",
+  "version": "0.0.2",
+  "description": "PoloClient written in TypeScript",
+  "main": "polo_client.ts",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "demo": "deno run --allow-net ./example/polo_client_example.ts"
+  },
+  "keywords": [],
+  "author": "Ayush Chothe",
+  "license": "ISC"
+}

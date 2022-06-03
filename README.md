@@ -1,23 +1,30 @@
 # Polo: WebSocket Library
 
-[![](https://img.shields.io/badge/Dart-%E2%9D%A4-blue)](https://dart.dev/)
+### A WebSocket Library written in Pure Dart. Easy API for writing WebSocket based Apps or Games, also Support for Flutter and Web.
 
-### A WebSocket Library written in Pure Dart. Easy API for writing WebSocket based Apps or Games. Also Support for Flutter and Web.
+## 📦 Packages
+
+| Name           | Link                                                                                                                                          | Language / Runtime |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| polo_server    | [![pub package](https://img.shields.io/pub/v/polo_server.svg?label=polo_server&color=blue)](https://pub.dartlang.org/packages/polo_server)    | Dart               |
+| polo_client    | [![pub package](https://img.shields.io/pub/v/polo_client.svg?label=polo_client&color=blue)](https://pub.dartlang.org/packages/polo_client)    | Dart               |
+| polo_client_ts | [![pub package](https://img.shields.io/pub/v/polo_client.svg?label=polo_client_ts&color=blue)](https://pub.dartlang.org/packages/polo_client) | Deno (TypeScript)  |
 
 ## ✨ Features
 
 - **Multi-Platform**
-  - ` Android`, `IOS`, `Windows`, `Linux`, `macOS`, `Web`
+  - `Android`, `IOS`, `Windows`, `Linux`, `macOS`, `Web`.
 - **Easy to Use API**
+- **Library Officially Available in Multiple Programming Languages**
 
-## Getting Started
+## 📖 Getting Started
 
 ### **Baic Chat App**
 
-- Server Code
+- Server Code (Dart)
 
 ```dart
-// Polo Server
+  // Polo Server
   PoloServer server = await Polo.createServer();
 
   server.onClientConnect((client) {
@@ -32,7 +39,7 @@
   });
 ```
 
-- Client Code
+- Client Code (Dart)
 
 ```dart
   // Polo Client
@@ -54,6 +61,27 @@
   });
 
   client.listen();
+```
+
+- Client Code (TypeScript)
+
+```ts
+// Polo Client
+const client: PoloClient = await Polo.connect("ws://127.0.0.1:3000/");
+
+client.onConnect(() => {
+  console.log("Client Connected to Server");
+});
+
+client.onDisconnect(() => {
+  console.log("Client Disconnected from Server");
+});
+
+client.onEvent("message", (message) => {
+  console.log(`${message}`);
+});
+
+client.listen();
 ```
 
 ## 💪 Contributions

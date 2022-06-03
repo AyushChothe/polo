@@ -35,7 +35,7 @@ class PoloWebClient {
   }
 
   /// Closes the connection to the `PoloServer`
-  Future<void> close() async {
+  void close() async {
     return _webSocket.close();
   }
 
