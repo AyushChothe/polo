@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
-part 'polo_client_base.dart';
+import './polo_client_stub.dart' as stub;
+
+part 'polo_io_client_base.dart';
 
 /// Creates an Instance of Polo Websocket Client (`PoloClient`)
-class Polo {
+class Polo implements stub.Polo {
   /// Connects to the `PoloServer` and Returns the Instance of `PoloClient`
   static Future<PoloClient> connect(String url) async {
     io.WebSocket client = await io.WebSocket.connect(url);

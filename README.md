@@ -45,9 +45,6 @@
   // Polo Client
   PoloClient client = await Polo.connect("ws://127.0.0.1:3000/");
 
-  // PoloWecClient (if using from Flutter Web or Dart Web (webdev))
-  PoloWebClient client = await PoloWeb.connect("ws://127.0.0.1:3000/");
-
   client.onConnect(() {
     print("Client Connected to Server");
   });

@@ -1,3 +1,7 @@
+## 0.0.2+2
+
+- Flutter Web Support Added
+
 ## 0.0.2
 
 - Web Support added

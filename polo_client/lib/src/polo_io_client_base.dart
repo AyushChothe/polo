@@ -1,7 +1,7 @@
-part of 'polo_client_helper.dart';
+part of 'polo_io_client_helper.dart';
 
 /// Use `Polo.connect()` to Connect to the `PoloServer`
-class PoloClient {
+class PoloClient implements stub.PoloClient {
   final io.WebSocket _webSocket;
   final Map<String, void Function(dynamic)> _callbacks = {};
 
@@ -11,13 +11,16 @@ class PoloClient {
   PoloClient._(this._webSocket);
 
   /// Sets onConnectCallback
+  @override
   void onConnect(void Function() callback) => _onConnectCallback = callback;
 
   /// Sets onDisconnectCallback
+  @override
   void onDisconnect(void Function() callback) =>
       _onDisconnectCallback = callback;
 
   /// Adds a Callback to an Event
+  @override
   void onEvent(String event, void Function(dynamic data) callback) =>
       _callbacks[event] = callback;
 
@@ -25,17 +28,20 @@ class PoloClient {
       _callbacks.containsKey(event) ? _callbacks[event]!(data) : () {};
 
   /// Starts listening for messages from `PoloServer`
+  @override
   Future<void> listen() {
     return _handleEvents();
   }
 
   /// Sends message to the Server from Client
+  @override
   void send(String event, dynamic data) {
     _webSocket.add(jsonEncode({'event': event, 'data': data}));
   }
 
   /// Closes the connection to the `PoloServer`
-  Future<void> close() async {
+  @override
+  Future<dynamic> close() {
     return _webSocket.close();
   }
 

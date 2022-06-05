@@ -1,7 +1,9 @@
 import { Polo, PoloClient } from "../polo_client.ts";
 
 // Polo Client
-const client: PoloClient = await Polo.connect("ws://127.0.0.1:3000/chat");
+const client: PoloClient = await Polo.connect(
+  "ws://polo-chat-server.herokuapp.com/",
+);
 
 client.onConnect(() => {
   console.log("Client Connected to Server");
@@ -16,3 +18,4 @@ client.onEvent("message", (message) => {
 });
 
 client.listen();
+client.send("message", "Hello");
