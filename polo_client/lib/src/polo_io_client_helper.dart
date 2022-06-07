@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import './polo_client_stub.dart' as stub;
+import 'polo_type.dart';
 
 part 'polo_io_client_base.dart';
 

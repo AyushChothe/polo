@@ -3,7 +3,7 @@ part of 'polo_io_client_helper.dart';
 /// Use `Polo.connect()` to Connect to the `PoloServer`
 class PoloClient implements stub.PoloClient {
   final io.WebSocket _webSocket;
-  final Map<String, void Function(dynamic)> _callbacks = {};
+  final Map<String, Function> _callbacks = {};
 
   void Function() _onDisconnectCallback = () {};
   void Function() _onConnectCallback = () {};
@@ -21,11 +21,22 @@ class PoloClient implements stub.PoloClient {
 
   /// Adds a Callback to an Event
   @override
-  void onEvent(String event, void Function(dynamic data) callback) =>
+  void onEvent<T>(String event, void Function(T data) callback,
+      {PoloType? converter}) {
+    if (converter != null) {
+      assert(converter is T);
+      _callbacks[event] = (data) {
+        T typedData = converter.fromMap(data) as T;
+        callback(typedData);
+      };
+    } else {
       _callbacks[event] = callback;
+    }
+  }
 
-  void _emit(String event, dynamic data) =>
-      _callbacks.containsKey(event) ? _callbacks[event]!(data) : () {};
+  void _emit(String event, dynamic data) {
+    if (_callbacks.containsKey(event)) _callbacks[event]!(data);
+  }
 
   /// Starts listening for messages from `PoloServer`
   @override
@@ -35,8 +46,12 @@ class PoloClient implements stub.PoloClient {
 
   /// Sends message to the Server from Client
   @override
-  void send(String event, dynamic data) {
-    _webSocket.add(jsonEncode({'event': event, 'data': data}));
+  void send<T>(String event, dynamic data) {
+    if (data is PoloType) {
+      _webSocket.add(jsonEncode({'event': event, 'data': data.toMap()}));
+    } else {
+      _webSocket.add(jsonEncode({'event': event, 'data': data}));
+    }
   }
 
   /// Closes the connection to the `PoloServer`
@@ -59,7 +74,7 @@ class PoloClient implements stub.PoloClient {
     } catch (e) {
       print("Error: $e");
     } finally {
-      _webSocket.close();
+      close();
     }
   }
 }

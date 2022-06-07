@@ -70,33 +70,46 @@ class PoloServer {
   }
 
   /// Sends message to all Clients
-  void send(String event, dynamic message) {
+  void send<T>(String event, T data) {
     for (PoloClient client in _clients.values) {
-      client.send(event, message);
+      client.send<T>(event, data);
     }
   }
 
   /// Sends message to a Client by Id
-  void sendToClient(String clientId, String event, dynamic message) {
-    if (_clients.containsKey(clientId)) {
-      _clients[clientId]!.send(event, message);
+  void sendToClient<T>(PoloClient client, String event, T data) {
+    if (_clients.containsKey(client)) {
+      _clients[client]!.send<T>(event, data);
     }
   }
 
   /// Sends message to a Room
-  void sendToRoom(String room, String event, dynamic message) {
+  void sendToRoom<T>(String room, String event, T data) {
     for (PoloClient client in _clients.values) {
       if (client._rooms.contains(room)) {
-        client.send(event, message);
+        client.send<T>(event, data);
       }
     }
   }
 
   /// Broadcast from a Client to all other Clients
-  void broadcastFrom(String clientId, String event, dynamic message) {
-    for (PoloClient client in _clients.values) {
-      if (client.id != clientId) {
-        client.send(event, message);
+  void broadcastFrom<T>(PoloClient client, String event, T data) {
+    for (PoloClient clientL in _clients.values) {
+      if (clientL.id != client.id) {
+        clientL.send<T>(event, data);
+      }
+    }
+  }
+
+  /// Broadcast from a Client to Room
+  void broadcastToRoom<T>(
+      PoloClient client, String room, String event, T data) {
+    // Sender Client must join the Room to Broadcast
+    if (!client._rooms.contains(room)) return;
+
+    for (PoloClient clientL in _clients.values) {
+      if (clientL.id != client.id && clientL._rooms.contains(room)) {
+        clientL.send<T>(event, data);
       }
     }
   }

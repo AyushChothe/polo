@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:polo_server/src/polo_type.dart';
 import 'package:uuid/uuid.dart';
 
 part 'polo_client_base.dart';

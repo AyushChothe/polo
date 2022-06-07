@@ -1,39 +1,34 @@
+import 'polo_type.dart';
+
 abstract class PoloClient {
-  final Map<String, void Function(dynamic)> _callbacks = {};
-
-  void Function() _onDisconnectCallback = () {};
-  void Function() _onConnectCallback = () {};
-
   /// Sets onConnectCallback
-  void onConnect(void Function() callback) => _onConnectCallback = callback;
+  void onConnect(void Function() callback) {
+    throw UnsupportedError("Platform is not Supported");
+  }
 
   /// Sets onDisconnectCallback
-  void onDisconnect(void Function() callback) =>
-      _onDisconnectCallback = callback;
+  void onDisconnect(void Function() callback) {
+    throw UnsupportedError("Platform is not Supported");
+  }
 
   /// Adds a Callback to an Event
-  void onEvent(String event, void Function(dynamic data) callback) =>
-      _callbacks[event] = callback;
-
-  void _emit(String event, dynamic data) =>
-      _callbacks.containsKey(event) ? _callbacks[event]!(data) : () {};
+  void onEvent<T>(String event, void Function(T data) callback,
+      {PoloType? converter}) {
+    throw UnsupportedError("Platform is not Supported");
+  }
 
   /// Starts listening for messages from `PoloServer`
   Future<void> listen() {
-    return _handleEvents();
+    throw UnsupportedError("Platform is not Supported");
   }
 
   /// Sends message to the Server from Client
-  void send(String event, dynamic data) {
+  void send<T>(String event, T data) {
     throw UnsupportedError("Platform is not Supported");
   }
 
   /// Closes the connection to the `PoloServer`
   Future<void> close() async {
-    throw UnsupportedError("Platform is not Supported");
-  }
-
-  Future<void> _handleEvents() async {
     throw UnsupportedError("Platform is not Supported");
   }
 }

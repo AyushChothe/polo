@@ -5,7 +5,7 @@ class PoloClient {
   final WebSocket _webSocket;
   late final String _id;
   String get id => _id;
-  Map<String, void Function(dynamic)> callbacks = {};
+  final Map<String, Function> _callbacks = {};
   final Set<String> _rooms = {};
 
   void Function(PoloClient) _onDisconnectCallback = (poloClient) {};
@@ -19,15 +19,30 @@ class PoloClient {
       _onDisconnectCallback = callback;
 
   /// Adds a Callback to an Event
-  void onEvent(String event, void Function(dynamic data) callback) =>
-      callbacks[event] = callback;
+  void onEvent<T>(String event, void Function(T data) callback,
+      {PoloType? converter}) {
+    if (converter != null) {
+      assert(converter is T);
+      _callbacks[event] = (data) {
+        T typedData = converter.fromMap(data) as T;
+        callback(typedData);
+      };
+    } else {
+      _callbacks[event] = callback;
+    }
+  }
 
-  void _emit(String event, dynamic data) =>
-      callbacks.containsKey(event) ? callbacks[event]!(data) : () {};
+  void _emit(String event, dynamic data) {
+    if (_callbacks.containsKey(event)) _callbacks[event]!(data);
+  }
 
   /// Sends message to the Client from Server
-  void send(String event, dynamic data) {
-    _webSocket.add(jsonEncode({'event': event, 'data': data}));
+  void send<T>(String event, T data) {
+    if (data is PoloType) {
+      _webSocket.add(jsonEncode({'event': event, 'data': data.toMap()}));
+    } else {
+      _webSocket.add(jsonEncode({'event': event, 'data': data}));
+    }
   }
 
   /// Joins a Room
@@ -41,16 +56,14 @@ class PoloClient {
   }
 
   /// Closes the Client
-  Future<void> close() async {
+  Future<dynamic> close() async {
     return _webSocket.close();
   }
 
-  void _handleEvents() async {
+  Future<void> _handleEvents() async {
     _webSocket.done.then((_) {
-      // emit('disconnect', this);
       _onDisconnectCallback(this);
     });
-    onEvent("message", (message) => print(message.toString()));
     try {
       //Listen for Messages from Client
       await for (dynamic message in _webSocket) {
@@ -60,7 +73,7 @@ class PoloClient {
     } catch (e) {
       print("Error: $e");
     } finally {
-      _webSocket.close();
+      close();
     }
   }
 }
