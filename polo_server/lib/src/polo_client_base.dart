@@ -3,14 +3,18 @@ part of 'polo_server_helper.dart';
 /// `PoloClient` is used to handle Connected WebSocket
 class PoloClient {
   final WebSocket _webSocket;
+
   late final String _id;
   String get id => _id;
+
   final Map<String, Function> _callbacks = {};
+  final Map<String, PoloTypeAdapter> _registeredTypes;
+
   final Set<String> _rooms = {};
 
   void Function(PoloClient) _onDisconnectCallback = (poloClient) {};
 
-  PoloClient._(this._webSocket) {
+  PoloClient._(this._webSocket, this._registeredTypes) {
     _id = Uuid().v4();
     _handleEvents();
   }
@@ -19,12 +23,16 @@ class PoloClient {
       _onDisconnectCallback = callback;
 
   /// Adds a Callback to an Event
-  void onEvent<T>(String event, void Function(T data) callback,
-      {PoloType? converter}) {
-    if (converter != null) {
-      assert(converter is T);
-      _callbacks[event] = (data) {
-        T typedData = converter.fromMap(data) as T;
+  void onEvent<T>(
+    String event,
+    void Function(T data) callback,
+  ) {
+    String typeStr = T.toString();
+    if (_registeredTypes.containsKey(typeStr)) {
+      _callbacks[event] = (Map<String, dynamic> data) {
+        PoloTypeAdapter<T> typeAdapter =
+            _registeredTypes[typeStr]! as PoloTypeAdapter<T>;
+        T typedData = typeAdapter.fromMap(data);
         callback(typedData);
       };
     } else {
@@ -38,8 +46,13 @@ class PoloClient {
 
   /// Sends message to the Client from Server
   void send<T>(String event, T data) {
-    if (data is PoloType) {
-      _webSocket.add(jsonEncode({'event': event, 'data': data.toMap()}));
+    String typeStr = T.toString();
+
+    if (_registeredTypes.containsKey(typeStr)) {
+      PoloTypeAdapter<T> typeAdapter =
+          _registeredTypes[typeStr]! as PoloTypeAdapter<T>;
+      _webSocket
+          .add(jsonEncode({'event': event, 'data': typeAdapter.toMap(data)}));
     } else {
       _webSocket.add(jsonEncode({'event': event, 'data': data}));
     }

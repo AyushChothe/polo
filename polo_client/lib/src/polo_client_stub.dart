@@ -12,8 +12,7 @@ abstract class PoloClient {
   }
 
   /// Adds a Callback to an Event
-  void onEvent<T>(String event, void Function(T data) callback,
-      {PoloType? converter}) {
+  void onEvent<T>(String event, void Function(T data) callback) {
     throw UnsupportedError("Platform is not Supported");
   }
 
@@ -24,6 +23,11 @@ abstract class PoloClient {
 
   /// Sends message to the Server from Client
   void send<T>(String event, T data) {
+    throw UnsupportedError("Platform is not Supported");
+  }
+
+  /// Register a custom Object as a Type with `PoloTypeAdapter`
+  void registerType<T>(PoloTypeAdapter<T> type) {
     throw UnsupportedError("Platform is not Supported");
   }
 

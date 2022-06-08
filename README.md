@@ -14,12 +14,15 @@
 
 - **Multi-Platform**
   - `Android`, `IOS`, `Windows`, `Linux`, `macOS`, `Web`.
-- **Easy to Use API**
+- **Typed Events**
+  - Refer `PoloType` and `PoloTypeAdapter`.
 - **Library Officially Available in Multiple Programming Languages**
+  - `Dart`, `TypeScript`.
+- **Easy to Use API**
 
 ## 📖 Getting Started
 
-### **Baic Chat App**
+### **Basic Chat App**
 
 - Server Code (Dart)
 
@@ -30,8 +33,8 @@
   server.onClientConnect((client) {
     print("Client(${client.id}) Connected!");
 
-    client.onEvent('message',
-        (message) => server.broadcastFrom(client.id, 'message', message));
+    client.onEvent<String>('message',
+        (message) => server.broadcastFrom<String>(client, 'message', message));
   });
 
   server.onClientDisconnect((client) {
@@ -53,7 +56,7 @@
     print("Client Disconnected from Server");
   });
 
-  client.onEvent('message', (message) {
+  client.onEvent<String>('message', (message) {
     print("$message");
   });
 
@@ -74,7 +77,7 @@ client.onDisconnect(() => {
   console.log("Client Disconnected from Server");
 });
 
-client.onEvent("message", (message) => {
+client.onEvent<string>("message", (message) => {
   console.log(`${message}`);
 });
 

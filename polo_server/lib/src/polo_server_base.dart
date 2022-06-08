@@ -10,6 +10,8 @@ class PoloServer {
 
   final Map<String, PoloClient> _clients = {};
 
+  final Map<String, PoloTypeAdapter> _registeredTypes = {};
+
   void Function(PoloClient client) _onConnectCallback = (client) {};
   void Function(PoloClient client) _onDisconnectCallback = (client) {};
 
@@ -62,7 +64,7 @@ class PoloServer {
   }
 
   void _handleClient(WebSocket webSocket) {
-    PoloClient client = PoloClient._(webSocket);
+    PoloClient client = PoloClient._(webSocket, _registeredTypes);
     // On Client Connected
     _onConnect(client);
     // On Client Disconnected
@@ -112,6 +114,12 @@ class PoloServer {
         clientL.send<T>(event, data);
       }
     }
+  }
+
+  /// Register a Type to the `PoloServer`
+  void registerType<T>(PoloTypeAdapter<T> type) {
+    final typeString = T.toString();
+    _registeredTypes[typeString] = type;
   }
 
   /// Closes the Server

@@ -4,7 +4,7 @@ part of 'polo_io_client_helper.dart';
 class PoloClient implements stub.PoloClient {
   final io.WebSocket _webSocket;
   final Map<String, Function> _callbacks = {};
-
+  final Map<String, PoloTypeAdapter> _registeredTypes = {};
   void Function() _onDisconnectCallback = () {};
   void Function() _onConnectCallback = () {};
 
@@ -21,12 +21,13 @@ class PoloClient implements stub.PoloClient {
 
   /// Adds a Callback to an Event
   @override
-  void onEvent<T>(String event, void Function(T data) callback,
-      {PoloType? converter}) {
-    if (converter != null) {
-      assert(converter is T);
-      _callbacks[event] = (data) {
-        T typedData = converter.fromMap(data) as T;
+  void onEvent<T>(String event, void Function(T data) callback) {
+    String typeStr = T.toString();
+    if (_registeredTypes.containsKey(typeStr)) {
+      _callbacks[event] = (Map<String, dynamic> data) {
+        PoloTypeAdapter<T> typeAdapter =
+            _registeredTypes[typeStr]! as PoloTypeAdapter<T>;
+        T typedData = typeAdapter.fromMap(data);
         callback(typedData);
       };
     } else {
@@ -46,12 +47,24 @@ class PoloClient implements stub.PoloClient {
 
   /// Sends message to the Server from Client
   @override
-  void send<T>(String event, dynamic data) {
-    if (data is PoloType) {
-      _webSocket.add(jsonEncode({'event': event, 'data': data.toMap()}));
+  void send<T>(String event, T data) {
+    String typeStr = T.toString();
+
+    if (_registeredTypes.containsKey(typeStr)) {
+      PoloTypeAdapter<T> typeAdapter =
+          _registeredTypes[typeStr]! as PoloTypeAdapter<T>;
+      _webSocket
+          .add(jsonEncode({'event': event, 'data': typeAdapter.toMap(data)}));
     } else {
       _webSocket.add(jsonEncode({'event': event, 'data': data}));
     }
+  }
+
+  /// Register a Type to the `PoloClient`
+  @override
+  void registerType<T>(PoloTypeAdapter<T> type) {
+    final typeString = T.toString();
+    _registeredTypes[typeString] = type;
   }
 
   /// Closes the connection to the `PoloServer`

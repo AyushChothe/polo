@@ -1,14 +1,12 @@
 import 'package:polo_server/polo_server.dart';
-import 'package:polo_server/src/polo_type.dart';
 
 class UserType implements PoloType {
-  String? name;
-  int? age;
+  final String name;
+  final int age;
 
-  UserType({this.name, this.age});
+  UserType({required this.name, required this.age});
 
-  @override
-  UserType fromMap(Map<String, dynamic> map) {
+  factory UserType.fromMap(Map<String, dynamic> map) {
     return UserType(name: map['name'], age: map['age']);
   }
 
@@ -21,10 +19,18 @@ class UserType implements PoloType {
 void main() async {
   // Manager
   // Polo polo = await Polo.createManager();
-  // PoloServer server = polo.of('/chat');
+  // PoloServer server = polo.of('/');
 
   // Direct Server
-  PoloServer server = await Polo.createServer();
+  PoloServer server = await Polo.createServer(address: "127.0.0.1", port: 3000);
+
+  // Register a Type
+  server.registerType<UserType>(
+    PoloTypeAdapter<UserType>(
+      toMap: (type) => type.toMap(),
+      fromMap: (map) => UserType.fromMap(map),
+    ),
+  );
 
   server.onClientConnect((client) {
     print("Client(${client.id}) Connected!");
@@ -39,30 +45,10 @@ void main() async {
       client.send('message', "Hello from Server");
     });
 
-    client.onEvent<UserType>(
-      'userJoined',
-      (user) {
-        print("userJoined : ${user.toMap()} : ${user.runtimeType}");
-        client.send<UserType>('userJoined', user);
-      },
-      converter: UserType(),
-    );
-
-    // client.onEvent<String>('message',
-    //     (message) => server.broadcastFrom(client, 'message', message));
-
-    // client.onEvent(
-    //     'messageToRoom',
-    //     (payload) => server.broadcastToRoom(
-    //         client, payload['room'], 'message', payload['message']));
-
-    // client.onEvent('joinRoom', (room) {
-    //   client.joinRoom(room);
-    // });
-
-    // client.onEvent('leaveRoom', (room) {
-    //   client.leaveRoom(room);
-    // });
+    client.onEvent<UserType>('userJoined', (user) {
+      print("userJoined : ${user.toMap()} : ${user.runtimeType}");
+      client.send<UserType>('userJoined', user);
+    });
   });
 
   server.onClientDisconnect((client) {
