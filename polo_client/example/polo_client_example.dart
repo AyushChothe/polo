@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:polo_client/polo_client.dart';
 
 class UserType implements PoloType {
@@ -30,18 +32,26 @@ void main() async {
 
   client.onConnect(() {
     print("Client Connected to Server");
-
-    client.send('dynamic', "Ayush");
-    client.send('dynamic', 1);
-    client.send('dynamic', 3.14);
-    client.send('dynamic', true);
-    client.send('dynamic', [1, 2, 3]);
-    client.send('dynamic', null);
-    client.send('dynamic', {
-      "String": {"dynamic": true}
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      client.send<String>('polo:ping', DateTime.now().toUtc().toString());
     });
-    client.send<String>('message', "Hello from Client");
-    client.send<UserType>('userJoined', UserType(name: "Ayush", age: 22));
+
+    // client.send('dynamic', "Ayush");
+    // client.send('dynamic', 1);
+    // client.send('dynamic', 3.14);
+    // client.send('dynamic', true);
+    // client.send('dynamic', [1, 2, 3]);
+    // client.send('dynamic', null);
+    // client.send('dynamic', {
+    //   "String": {"dynamic": true}
+    // });
+    // client.send<String>('message', "Hello from Client");
+    // client.send<UserType>('userJoined', UserType(name: "Ayush", age: 22));
+  });
+
+  client.onEvent<String>('polo:pong', (dateTime) {
+    print(
+        "Ping: ${DateTime.now().toUtc().difference(DateTime.parse(dateTime).toUtc()).inMilliseconds} ms");
   });
 
   client.onEvent('dynamic', (dyn) {

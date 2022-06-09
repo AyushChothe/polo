@@ -1,5 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
 type VoidCallback = () => void;
-type DataCallback = (data: any) => void;
+type DataCallback<T> = (data: T) => void;
 
 export type { DataCallback, VoidCallback };

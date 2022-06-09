@@ -1,6 +1,6 @@
 {
   "name": "polo_client_ts",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "PoloClient written in TypeScript",
   "main": "polo_client.ts",
   "directories": {

@@ -35,6 +35,11 @@ void main() async {
   server.onClientConnect((client) {
     print("Client(${client.id}) Connected!");
 
+    client.onEvent<String>(
+      'polo:ping',
+      (dateTime) => client.send('polo:pong', dateTime),
+    );
+
     client.onEvent('dynamic', (dyn) {
       print("Dynamic: $dyn : ${dyn.runtimeType}");
       client.send('dynamic', dyn);

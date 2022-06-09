@@ -3,9 +3,9 @@ import { DataCallback, VoidCallback } from "./types.ts";
 
 class PoloClient {
   private _webSocket: WebSocket;
-  private _callbacks: Map<string, DataCallback> = new Map<
+  private _callbacks: Map<string, DataCallback<any>> = new Map<
     string,
-    DataCallback
+    DataCallback<any>
   >();
 
   private constructor(webSocket: WebSocket) {
@@ -30,7 +30,7 @@ class PoloClient {
   }
 
   /// Adds a Callback to an Event
-  onEvent(event: string, callback: DataCallback): void {
+  onEvent<T>(event: string, callback: DataCallback<T>): void {
     this._callbacks.set(event, callback);
   }
 
@@ -46,7 +46,7 @@ class PoloClient {
   }
 
   /// Sends message to the Server from Client
-  send(event: string, data: any): void {
+  send<T>(event: string, data: T): void {
     this._webSocket.send(JSON.stringify({ event, data }));
   }
 
