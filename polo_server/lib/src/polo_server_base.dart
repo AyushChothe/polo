@@ -13,7 +13,8 @@ class PoloServer {
   final Map<String, PoloTypeAdapter> _registeredTypes = {};
 
   void Function(PoloClient client) _onConnectCallback = (client) {};
-  void Function(PoloClient client) _onDisconnectCallback = (client) {};
+  void Function(String clientId, int? closeCode, String? closeReason)
+      _onDisconnectCallback = (_, __, ___) {};
 
   PoloServer._fromServer(this._httpServer) {
     assert(_httpServer != null);
@@ -41,7 +42,9 @@ class PoloServer {
   }
 
   /// Set OnDisconnect Callback
-  void onClientDisconnect(void Function(PoloClient client) callback) {
+  void onClientDisconnect(
+      void Function(String clientId, int? closeCode, String? closeReason)
+          callback) {
     _onDisconnectCallback = callback;
   }
 
@@ -51,13 +54,13 @@ class PoloServer {
   }
 
   void _onDisconnect(PoloClient client) {
-    client._onDisconnect((client) {
-      _clients.remove(client.id);
-      _onDisconnectCallback(client);
+    client._onDisconnect((clientId, closeCode, closeReason) {
+      _clients.remove(clientId);
+      _onDisconnectCallback(clientId, closeCode, closeReason);
     });
   }
 
-  void _handleServer() async {
+  void _handleServer() {
     _sub = _server.listen((webSocket) {
       _handleClient(webSocket);
     });

@@ -1,13 +1,17 @@
 import 'polo_type.dart';
 
 abstract class PoloClient {
+  String? get protocol;
+  int get readyState;
+
   /// Sets onConnectCallback
   void onConnect(void Function() callback) {
     throw UnsupportedError("Platform is not Supported");
   }
 
   /// Sets onDisconnectCallback
-  void onDisconnect(void Function() callback) {
+  void onDisconnect(
+      void Function(int? closeCode, String? closeReason) callback) {
     throw UnsupportedError("Platform is not Supported");
   }
 

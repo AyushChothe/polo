@@ -7,19 +7,26 @@ class PoloClient {
   late final String _id;
   String get id => _id;
 
+  String? get protocol => _webSocket.protocol;
+
+  int get readyState => _webSocket.readyState;
+
   final Map<String, Function> _callbacks = {};
   final Map<String, PoloTypeAdapter> _registeredTypes;
 
   final Set<String> _rooms = {};
 
-  void Function(PoloClient) _onDisconnectCallback = (poloClient) {};
+  void Function(String clientId, int? closeCode, String? closeReason)
+      _onDisconnectCallback = (_, __, ___) {};
 
   PoloClient._(this._webSocket, this._registeredTypes) {
     _id = Uuid().v4();
     _handleEvents();
   }
 
-  void _onDisconnect(void Function(PoloClient) callback) =>
+  void _onDisconnect(
+          void Function(String clientId, int? closeCode, String? closeReason)
+              callback) =>
       _onDisconnectCallback = callback;
 
   /// Adds a Callback to an Event
@@ -75,7 +82,7 @@ class PoloClient {
 
   Future<void> _handleEvents() async {
     _webSocket.done.then((_) {
-      _onDisconnectCallback(this);
+      _onDisconnectCallback(id, _webSocket.closeCode, _webSocket.closeReason);
     });
     try {
       //Listen for Messages from Client

@@ -21,32 +21,33 @@ class UserType implements PoloType {
 
 void main() async {
   // Polo Client
-  PoloClient client = await Polo.connect("ws://127.0.0.1:3000/");
+  PoloClient client = await Polo.connect("ws://127.0.0.1:3000/ws");
 
   client.registerType(
     PoloTypeAdapter<UserType>(
-      toMap: ((type) => type.toMap()),
+      toMap: (type) => type.toMap(),
       fromMap: (map) => UserType.fromMap(map),
     ),
   );
 
   client.onConnect(() {
     print("Client Connected to Server");
+    print("${client.protocol}:${client.readyState}");
     Timer.periodic(Duration(seconds: 1), (timer) {
       client.send<String>('polo:ping', DateTime.now().toUtc().toString());
     });
 
-    // client.send('dynamic', "Ayush");
-    // client.send('dynamic', 1);
-    // client.send('dynamic', 3.14);
-    // client.send('dynamic', true);
-    // client.send('dynamic', [1, 2, 3]);
-    // client.send('dynamic', null);
-    // client.send('dynamic', {
-    //   "String": {"dynamic": true}
-    // });
-    // client.send<String>('message', "Hello from Client");
-    // client.send<UserType>('userJoined', UserType(name: "Ayush", age: 22));
+    client.send('dynamic', "Ayush");
+    client.send('dynamic', 1);
+    client.send('dynamic', 3.14);
+    client.send('dynamic', true);
+    client.send('dynamic', [1, 2, 3]);
+    client.send('dynamic', null);
+    client.send('dynamic', {
+      "String": {"dynamic": true}
+    });
+    client.send<String>('message', "Hello from Client");
+    client.send<UserType>('userJoined', UserType(name: "Ayush", age: 22));
   });
 
   client.onEvent<String>('polo:pong', (dateTime) {
@@ -66,8 +67,8 @@ void main() async {
     print("userJoined : ${user.toMap()} : ${user.runtimeType}");
   });
 
-  client.onDisconnect(() {
-    print("Client Disconnected from Server");
+  client.onDisconnect((closeCode, closeReason) {
+    print("Client Disconnected from Server($closeCode:$closeReason)");
   });
 
   client.listen();

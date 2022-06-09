@@ -18,11 +18,11 @@ class UserType implements PoloType {
 
 void main() async {
   // Manager
-  // Polo polo = await Polo.createManager();
-  // PoloServer server = polo.of('/');
+  Polo polo = await Polo.createManager(dashboardNamespace: '/dash');
+  PoloServer server = polo.of('/ws');
 
   // Direct Server
-  PoloServer server = await Polo.createServer(address: "127.0.0.1", port: 3000);
+  // PoloServer server = await Polo.createServer(address: "127.0.0.1", port: 3000);
 
   // Register a Type
   server.registerType<UserType>(
@@ -34,6 +34,7 @@ void main() async {
 
   server.onClientConnect((client) {
     print("Client(${client.id}) Connected!");
+    print("${client.protocol}:${client.readyState}");
 
     client.onEvent<String>(
       'polo:ping',
@@ -56,8 +57,8 @@ void main() async {
     });
   });
 
-  server.onClientDisconnect((client) {
-    print("Client(${client.id}) Disconnected!");
+  server.onClientDisconnect((clientId, closeCode, closeReason) {
+    print("Client($clientId:$closeCode:$closeReason) Disconnected!");
   });
 
   print("Server Running...");

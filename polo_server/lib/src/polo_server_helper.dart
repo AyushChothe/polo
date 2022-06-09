@@ -11,15 +11,23 @@ part 'polo_server_base.dart';
 /// Creates an Instance of Polo Websocket Server (`PoloServer`)
 class Polo {
   late final HttpServer _httpServer;
+  late Stream<HttpRequest> reqStream;
   final Map<String, PoloServer> _namespaces = {};
 
-  Polo._(this._httpServer);
+  final String? _dashboardNamespace;
+  Polo._(this._httpServer, this._dashboardNamespace) {
+    reqStream = _httpServer.asBroadcastStream();
+    _dashboard();
+  }
 
   /// Creates a Polo Manager to handle multiple `PoloServer`'s
-  static Future<Polo> createManager(
-      {String address = "127.0.0.1", int port = 3000}) async {
+  static Future<Polo> createManager({
+    String address = "127.0.0.1",
+    int port = 3000,
+    String? dashboardNamespace,
+  }) async {
     final httpServer = (await HttpServer.bind(address, port));
-    return Polo._(httpServer);
+    return Polo._(httpServer, dashboardNamespace);
   }
 
   /// Creates a Standalone `PoloServer`
@@ -29,14 +37,26 @@ class Polo {
     return PoloServer._fromServer(httpServer);
   }
 
-  /// Returns the Instance of `PoloServer` associated with the `/` Namespace
-  PoloServer get root => of('/');
+  void _dashboard() {
+    if (_dashboardNamespace == null) return;
+    PoloServer ps = of(_dashboardNamespace!);
+    ps.onClientConnect((client) {
+      client.onEvent('polo:dashboard:get_servers', (data) {});
+      client.onEvent('polo:dashboard:get_server', (data) {});
+      client.onEvent('polo:dashboard:get_clients', (data) {});
+      client.onEvent('polo:dashboard:get_events', (data) {});
+      client.onEvent('polo:dashboard:get_events', (data) {});
+    });
+  }
 
-  /// Returns the Instance of `PoloServer` associated with the Namespace
   /// or Creates the Instance if not present
   PoloServer of(String namespace) {
+    assert(
+        !(_namespaces.containsKey(_dashboardNamespace) &&
+            namespace == _dashboardNamespace),
+        "Dashboard is Enabled");
     if (!_namespaces.containsKey(namespace)) {
-      Stream<WebSocket> socketStream = _httpServer
+      Stream<WebSocket> socketStream = reqStream
           .where((req) => req.uri.path == namespace)
           .transform(WebSocketTransformer());
       _namespaces[namespace] = PoloServer._fromManager(
