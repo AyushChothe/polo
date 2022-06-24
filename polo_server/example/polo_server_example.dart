@@ -16,6 +16,38 @@ class UserType implements PoloType {
   }
 }
 
+class LoggerMiddleware implements PoloMiddleware {
+  @override
+  void clientToServer<T>(String clientId, String event, T data) {
+    print("Logger(clientToServer): $clientId:$event:$data");
+  }
+
+  @override
+  void serverToClient<T>(String clientId, String event, T data) {
+    print("Logger(serverToClient): $clientId:$event:$data");
+  }
+
+  @override
+  void clientConnect(String clientId) {
+    print("Logger(clientConnect): $clientId");
+  }
+
+  @override
+  void clientDisconnect(String clientId) {
+    print("Logger(clientDisconnect): $clientId");
+  }
+
+  @override
+  void clientJoinRoom(String clientId, String room) {
+    print("Logger(clientJoinRoom): $clientId:$room");
+  }
+
+  @override
+  void clientLeaveRoom(String clientId, String room) {
+    print("Logger(clientLeaveRoom): $clientId:$room");
+  }
+}
+
 void main() async {
   // Manager
   Polo polo = await Polo.createManager(dashboardNamespace: '/dash');
@@ -32,10 +64,12 @@ void main() async {
     ),
   );
 
-  server.onClientConnect((client) {
-    print("Client(${client.id}) Connected!");
-    print("${client.protocol}:${client.readyState}");
+  // Add Middleware
+  server.addMiddleware(LoggerMiddleware());
 
+  server.onClientConnect((client) {
+    client.joinRoom('public');
+    client.leaveRoom('public');
     client.onEvent<String>(
       'polo:ping',
       (dateTime) => client.send('polo:pong', dateTime),
@@ -55,10 +89,6 @@ void main() async {
       print("userJoined : ${user.toMap()} : ${user.runtimeType}");
       client.send<UserType>('userJoined', user);
     });
-  });
-
-  server.onClientDisconnect((clientId, closeCode, closeReason) {
-    print("Client($clientId:$closeCode:$closeReason) Disconnected!");
   });
 
   print("Server Running...");

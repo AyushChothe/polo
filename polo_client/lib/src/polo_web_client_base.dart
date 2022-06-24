@@ -2,7 +2,9 @@ part of 'polo_web_client_helper.dart';
 
 /// Use `Polo.connect()` to Connect to the `PoloServer`
 class PoloClient implements stub.PoloClient {
-  final html.WebSocket _webSocket;
+  late html.WebSocket _webSocket;
+
+  final String url;
 
   final Map<String, Function> _callbacks = {};
   final Map<String, PoloTypeAdapter> _registeredTypes = {};
@@ -18,7 +20,7 @@ class PoloClient implements stub.PoloClient {
   @override
   int get readyState => _webSocket.readyState;
 
-  PoloClient._(this._webSocket);
+  PoloClient._(this.url);
 
   /// Sets onConnectCallback
   @override
@@ -55,7 +57,8 @@ class PoloClient implements stub.PoloClient {
 
   /// Starts listening for messages from `PoloServer`
   @override
-  Future<void> listen() {
+  Future<void> connect() {
+    _webSocket = html.WebSocket(url);
     return _handleEvents();
   }
 
@@ -88,7 +91,7 @@ class PoloClient implements stub.PoloClient {
   }
 
   Future<void> _handleEvents() async {
-    _onConnectCallback();
+    _webSocket.onOpen.listen((event) => _onConnectCallback());
     _webSocket.onClose.listen((event) {
       _onDisconnectCallback(event.code, event.reason);
     });

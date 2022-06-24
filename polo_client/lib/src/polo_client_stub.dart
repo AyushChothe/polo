@@ -21,7 +21,7 @@ abstract class PoloClient {
   }
 
   /// Starts listening for messages from `PoloServer`
-  Future<void> listen() {
+  Future<void> connect() {
     throw UnsupportedError("Platform is not Supported");
   }
 
@@ -43,7 +43,7 @@ abstract class PoloClient {
 
 abstract class Polo {
   /// Connects to the `PoloServer` and Returns the Instance of `PoloClient`
-  static Future<PoloClient> connect(String url) async {
+  static PoloClient connect(String url) {
     throw UnsupportedError("Platform is not Supported");
   }
 }

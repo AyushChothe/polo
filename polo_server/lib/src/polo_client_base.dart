@@ -13,13 +13,13 @@ class PoloClient {
 
   final Map<String, Function> _callbacks = {};
   final Map<String, PoloTypeAdapter> _registeredTypes;
-
+  final List<PoloMiddleware> _middlewares;
   final Set<String> _rooms = {};
 
   void Function(String clientId, int? closeCode, String? closeReason)
       _onDisconnectCallback = (_, __, ___) {};
 
-  PoloClient._(this._webSocket, this._registeredTypes) {
+  PoloClient._(this._webSocket, this._registeredTypes, this._middlewares) {
     _id = Uuid().v4();
     _handleEvents();
   }
@@ -41,9 +41,13 @@ class PoloClient {
             _registeredTypes[typeStr]! as PoloTypeAdapter<T>;
         T typedData = typeAdapter.fromMap(data);
         callback(typedData);
+        mwCTS<T>(_middlewares, id, event, typedData);
       };
     } else {
-      _callbacks[event] = callback;
+      _callbacks[event] = (data) {
+        callback(data);
+        mwCTS(_middlewares, id, event, data);
+      };
     }
   }
 
@@ -58,21 +62,25 @@ class PoloClient {
     if (_registeredTypes.containsKey(typeStr)) {
       PoloTypeAdapter<T> typeAdapter =
           _registeredTypes[typeStr]! as PoloTypeAdapter<T>;
-      _webSocket
-          .add(jsonEncode({'event': event, 'data': typeAdapter.toMap(data)}));
+      Map<String, dynamic> mapData = typeAdapter.toMap(data);
+      _webSocket.add(jsonEncode({'event': event, 'data': mapData}));
+      mwSTC(_middlewares, id, event, mapData);
     } else {
       _webSocket.add(jsonEncode({'event': event, 'data': data}));
+      mwSTC(_middlewares, id, event, data);
     }
   }
 
   /// Joins a Room
   void joinRoom(String room) {
     _rooms.add(room.trim());
+    mwJR(_middlewares, id, room);
   }
 
   /// Leaves a Room
   void leaveRoom(String room) {
     _rooms.remove(room.trim());
+    mwLR(_middlewares, id, room);
   }
 
   /// Closes the Client
@@ -83,6 +91,7 @@ class PoloClient {
   Future<void> _handleEvents() async {
     _webSocket.done.then((_) {
       _onDisconnectCallback(id, _webSocket.closeCode, _webSocket.closeReason);
+      mwCD(_middlewares, id, _webSocket.closeCode, _webSocket.closeReason);
     });
     try {
       //Listen for Messages from Client

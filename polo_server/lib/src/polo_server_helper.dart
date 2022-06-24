@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:polo_server/src/polo_middleware.dart';
 import 'package:polo_server/src/polo_type.dart';
 import 'package:uuid/uuid.dart';
 
@@ -40,12 +41,34 @@ class Polo {
   void _dashboard() {
     if (_dashboardNamespace == null) return;
     PoloServer ps = of(_dashboardNamespace!);
+
+    List res() {
+      List servers = [];
+      for (MapEntry<String, PoloServer> ns in _namespaces.entries) {
+        servers.add({
+          'ns': ns.key,
+          'rooms': ns.value.rooms.toList(),
+          'clients': ns.value._clients.values.map((c) {
+            return {
+              "id": c.id,
+              'rooms': c._rooms.toList(),
+              "events": c._callbacks.keys.toList(),
+            };
+          }).toList(),
+        });
+      }
+      return servers;
+    }
+
     ps.onClientConnect((client) {
-      client.onEvent('polo:dashboard:get_servers', (data) {});
-      client.onEvent('polo:dashboard:get_server', (data) {});
-      client.onEvent('polo:dashboard:get_clients', (data) {});
-      client.onEvent('polo:dashboard:get_events', (data) {});
-      client.onEvent('polo:dashboard:get_events', (data) {});
+      Timer ping = Timer.periodic(Duration(seconds: 1), (_) {
+        client.send<List<dynamic>>('polo:dashboard:get', res());
+      });
+      ps.onClientDisconnect((clientId, closeCode, closeReason) {
+        ping.cancel();
+        print("Disconnected from Dashboard (${client.id})");
+      });
+      print("Connected to Dashboard (${client.id})");
     });
   }
 

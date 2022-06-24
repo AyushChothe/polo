@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:polo_client/polo_client.dart';
 
 class UserType implements PoloType {
@@ -21,7 +19,7 @@ class UserType implements PoloType {
 
 void main() async {
   // Polo Client
-  PoloClient client = await Polo.connect("ws://127.0.0.1:3000/ws");
+  PoloClient client = Polo.connect("ws://127.0.0.1:3000/ws");
 
   client.registerType(
     PoloTypeAdapter<UserType>(
@@ -33,9 +31,9 @@ void main() async {
   client.onConnect(() {
     print("Client Connected to Server");
     print("${client.protocol}:${client.readyState}");
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      client.send<String>('polo:ping', DateTime.now().toUtc().toString());
-    });
+    // Timer.periodic(Duration(seconds: 1), (timer) {
+    //   client.send<String>('polo:ping', DateTime.now().toUtc().toString());
+    // });
 
     client.send('dynamic', "Ayush");
     client.send('dynamic', 1);
@@ -71,5 +69,5 @@ void main() async {
     print("Client Disconnected from Server($closeCode:$closeReason)");
   });
 
-  client.listen();
+  client.connect();
 }

@@ -12,6 +12,8 @@ class PoloServer {
 
   final Map<String, PoloTypeAdapter> _registeredTypes = {};
 
+  final List<PoloMiddleware> _middlewares = [];
+
   void Function(PoloClient client) _onConnectCallback = (client) {};
   void Function(String clientId, int? closeCode, String? closeReason)
       _onDisconnectCallback = (_, __, ___) {};
@@ -50,6 +52,7 @@ class PoloServer {
 
   void _onConnect(PoloClient client) {
     _clients[client.id] = client;
+    mwCC(_middlewares, client.id);
     _onConnectCallback(client);
   }
 
@@ -67,7 +70,7 @@ class PoloServer {
   }
 
   void _handleClient(WebSocket webSocket) {
-    PoloClient client = PoloClient._(webSocket, _registeredTypes);
+    PoloClient client = PoloClient._(webSocket, _registeredTypes, _middlewares);
     // On Client Connected
     _onConnect(client);
     // On Client Disconnected
@@ -123,6 +126,11 @@ class PoloServer {
   void registerType<T>(PoloTypeAdapter<T> type) {
     final typeString = T.toString();
     _registeredTypes[typeString] = type;
+  }
+
+  /// Adds `PoloMiddleware` to the Server
+  void addMiddleware(PoloMiddleware middleware) {
+    _middlewares.add(middleware);
   }
 
   /// Closes the Server
