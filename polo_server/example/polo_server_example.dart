@@ -50,8 +50,9 @@ class LoggerMiddleware implements PoloMiddleware {
 
 void main() async {
   // Manager
-  Polo polo = await Polo.createManager(dashboardNamespace: '/dash');
-  PoloServer server = polo.of('/ws');
+  // Polo polo = await Polo.createManager(dashboardNamespace: '/dash');
+  // PoloServer server = polo.of('/ws');
+  PoloServer server = await Polo.createServer();
 
   // Direct Server
   // PoloServer server = await Polo.createServer(address: "127.0.0.1", port: 3000);

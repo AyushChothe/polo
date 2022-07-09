@@ -43,7 +43,7 @@ abstract class PoloClient {
 
 abstract class Polo {
   /// Connects to the `PoloServer` and Returns the Instance of `PoloClient`
-  static PoloClient connect(String url) {
+  static PoloClient createClient(String url) {
     throw UnsupportedError("Platform is not Supported");
   }
 }

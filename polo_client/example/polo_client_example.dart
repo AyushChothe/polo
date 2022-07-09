@@ -19,7 +19,7 @@ class UserType implements PoloType {
 
 void main() async {
   // Polo Client
-  PoloClient client = Polo.connect("ws://127.0.0.1:3000/ws");
+  PoloClient client = Polo.createClient("ws://127.0.0.1:3000/ws");
 
   client.registerType(
     PoloTypeAdapter<UserType>(
