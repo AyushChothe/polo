@@ -63,7 +63,7 @@ class PoloServer {
   }
 
   void _handleServer() {
-    _sub = _server.listen(_handleClient);
+    _sub = _server.asBroadcastStream().listen(_handleClient);
   }
 
   void _handleClient(WebSocket webSocket) {

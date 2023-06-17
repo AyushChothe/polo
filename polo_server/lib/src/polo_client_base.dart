@@ -88,10 +88,12 @@ class PoloClient {
   }
 
   Future<void> _handleEvents() async {
-    await _webSocket.done.then((_) {
-      _onDisconnectCallback(id, _webSocket.closeCode, _webSocket.closeReason);
-      mwCD(_middlewares, id, _webSocket.closeCode, _webSocket.closeReason);
-    });
+    unawaited(
+      _webSocket.done.then((_) {
+        _onDisconnectCallback(id, _webSocket.closeCode, _webSocket.closeReason);
+        mwCD(_middlewares, id, _webSocket.closeCode, _webSocket.closeReason);
+      }),
+    );
     try {
       //Listen for Messages from Client
       await for (final message in _webSocket) {
