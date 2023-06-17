@@ -1,10 +1,9 @@
 /// Helps to build a `Polo` compatible Type
 abstract class PoloType {
-  Map<String, dynamic> toMap() {
+  factory PoloType.fromMap() {
     throw UnimplementedError();
   }
-
-  factory PoloType.fromMap(Map<String, dynamic> map) {
+  Map<String, dynamic> toMap() {
     throw UnimplementedError();
   }
 }

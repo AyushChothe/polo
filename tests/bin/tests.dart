@@ -6,7 +6,7 @@ void main(List<String> args) async {
       await ps.Polo.createServer(address: "127.0.0.1", port: 3000);
   pc.PoloClient client = pc.Polo.createClient("ws://127.0.0.1:3000/");
 
-  server.onClientConnect((client) {
+  server.onClientConnect = ((client) {
     client.close();
     server.close();
   });

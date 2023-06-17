@@ -25,40 +25,40 @@ abstract class PoloMiddleware {
 }
 
 void mwCC(List<PoloMiddleware> middlewares, String clientId) {
-  for (PoloMiddleware mw in middlewares) {
+  for (final mw in middlewares) {
     mw.clientConnect(clientId);
   }
 }
 
 void mwCD(List<PoloMiddleware> middlewares, String clientId, int? closeCode,
-    String? closeReason) {
-  for (PoloMiddleware mw in middlewares) {
+    String? closeReason,) {
+  for (final mw in middlewares) {
     mw.clientDisconnect(clientId);
   }
 }
 
 void mwJR(List<PoloMiddleware> middlewares, String clientId, String room) {
-  for (PoloMiddleware mw in middlewares) {
+  for (final mw in middlewares) {
     mw.clientJoinRoom(clientId, room);
   }
 }
 
 void mwLR(List<PoloMiddleware> middlewares, String clientId, String room) {
-  for (PoloMiddleware mw in middlewares) {
+  for (final mw in middlewares) {
     mw.clientLeaveRoom(clientId, room);
   }
 }
 
 void mwSTC<T>(
-    List<PoloMiddleware> middlewares, String clientId, String event, T data) {
-  for (PoloMiddleware mw in middlewares) {
+    List<PoloMiddleware> middlewares, String clientId, String event, T data,) {
+  for (final mw in middlewares) {
     mw.serverToClient<T>(clientId, event, data);
   }
 }
 
 void mwCTS<T>(
-    List<PoloMiddleware> middlewares, String clientId, String event, T data) {
-  for (PoloMiddleware mw in middlewares) {
+    List<PoloMiddleware> middlewares, String clientId, String event, T data,) {
+  for (final mw in middlewares) {
     mw.clientToServer<T>(clientId, event, data);
   }
 }

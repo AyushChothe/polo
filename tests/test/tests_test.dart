@@ -10,7 +10,7 @@ void main() {
           await ps.Polo.createServer(address: "127.0.0.1", port: 3000);
       pc.PoloClient client = pc.Polo.createClient("ws://127.0.0.1:3000/");
 
-      server.onClientConnect((client) {
+      server.onClientConnect = ((client) {
         client.close();
         server.close();
       });
@@ -24,7 +24,7 @@ void main() {
       ps.PoloServer server = manager.of('/');
       pc.PoloClient client = pc.Polo.createClient("ws://127.0.0.1:3000/");
 
-      server.onClientConnect((client) {
+      server.onClientConnect = ((client) {
         client.close();
         server.close();
       });
@@ -42,7 +42,7 @@ void main() {
           await ps.Polo.createServer(address: "127.0.0.1", port: 3001);
       pc.PoloClient client = pc.Polo.createClient("ws://127.0.0.1:3001/");
 
-      server.onClientConnect((client) {
+      server.onClientConnect = ((client) {
         client.send<String>("string", send);
         server.close();
       });
@@ -63,7 +63,7 @@ void main() {
           await ps.Polo.createServer(address: "127.0.0.1", port: 3001);
       pc.PoloClient client = pc.Polo.createClient("ws://127.0.0.1:3001/");
 
-      server.onClientConnect((client) {
+      server.onClientConnect = ((client) {
         client.send<int>("int", send);
         server.close();
       });
@@ -84,7 +84,7 @@ void main() {
           await ps.Polo.createServer(address: "127.0.0.1", port: 3001);
       pc.PoloClient client = pc.Polo.createClient("ws://127.0.0.1:3001/");
 
-      server.onClientConnect((client) {
+      server.onClientConnect = ((client) {
         client.send<double>("double", send);
         server.close();
       });
@@ -105,7 +105,7 @@ void main() {
           await ps.Polo.createServer(address: "127.0.0.1", port: 3001);
       pc.PoloClient client = pc.Polo.createClient("ws://127.0.0.1:3001/");
 
-      server.onClientConnect((client) {
+      server.onClientConnect = ((client) {
         client.send<bool>("bool", send);
         server.close();
       });
@@ -117,6 +117,27 @@ void main() {
 
       await client.connect();
       expect(recv, equals(send));
+    });
+    test("List", () async {
+      List<String> send = ["Ayush", "Mahesh", "Chothe"];
+      List<String> recv = [];
+
+      ps.PoloServer server =
+          await ps.Polo.createServer(address: "127.0.0.1", port: 3001);
+      pc.PoloClient client = pc.Polo.createClient("ws://127.0.0.1:3001/");
+
+      server.onClientConnect = ((client) {
+        client.send<List<String>>("List", send);
+        server.close();
+      });
+
+      client.onEvent<List<dynamic>>("List", (data) {
+        recv = data.cast();
+        client.close();
+      });
+
+      await client.connect();
+      // expect(recv, equals(send));
     });
   }));
 }

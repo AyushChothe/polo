@@ -2,24 +2,7 @@ part of 'polo_server_helper.dart';
 
 /// Use `Polo.createServer()` to Create a Standalone Server
 class PoloServer {
-  late final HttpServer? _httpServer;
-  late final Stream<WebSocket> _server;
-  late final StreamSubscription _sub;
-
-  void Function() _onClose = () {};
-
-  final Map<String, PoloClient> _clients = {};
-
-  final Map<String, PoloTypeAdapter> _registeredTypes = {};
-
-  final List<PoloMiddleware> _middlewares = [];
-
-  void Function(PoloClient client) _onConnectCallback = (client) {};
-  void Function(String clientId, int? closeCode, String? closeReason)
-      _onDisconnectCallback = (_, __, ___) {};
-
-  PoloServer._fromServer(this._httpServer) {
-    assert(_httpServer != null);
+  PoloServer._fromServer(HttpServer this._httpServer) {
     _server = _httpServer!.transform(WebSocketTransformer());
     _handleServer();
   }
@@ -28,25 +11,41 @@ class PoloServer {
     _httpServer = null;
     _handleServer();
   }
+  late final HttpServer? _httpServer;
+  late final Stream<WebSocket> _server;
+  late final StreamSubscription<dynamic> _sub;
+
+  void Function() _onClose = () {};
+
+  final Map<String, PoloClient> _clients = {};
+
+  final Map<String, PoloTypeAdapter<dynamic>> _registeredTypes = {};
+
+  final List<PoloMiddleware> _middlewares = [];
+
+  void Function(PoloClient client) _onConnectCallback = (client) {};
+  void Function(String clientId, int? closeCode, String? closeReason)
+      _onDisconnectCallback = (_, __, ___) {};
 
   /// Get all rooms
   Set<String> get rooms {
-    Set<String> allRooms = {};
-    for (PoloClient client in _clients.values) {
+    final allRooms = <String>{};
+    for (final client in _clients.values) {
       allRooms.addAll(client._rooms);
     }
     return allRooms;
   }
 
   /// Set OnConnect Callback
-  void onClientConnect(void Function(PoloClient client) callback) {
+  set onClientConnect(void Function(PoloClient client) callback) {
     _onConnectCallback = callback;
   }
 
   /// Set OnDisconnect Callback
-  void onClientDisconnect(
-      void Function(String clientId, int? closeCode, String? closeReason)
-          callback) {
+  set onClientDisconnect(
+    void Function(String clientId, int? closeCode, String? closeReason)
+        callback,
+  ) {
     _onDisconnectCallback = callback;
   }
 
@@ -57,20 +56,18 @@ class PoloServer {
   }
 
   void _onDisconnect(PoloClient client) {
-    client._onDisconnect((clientId, closeCode, closeReason) {
+    client._onDisconnect = (clientId, closeCode, closeReason) {
       _clients.remove(clientId);
       _onDisconnectCallback(clientId, closeCode, closeReason);
-    });
+    };
   }
 
   void _handleServer() {
-    _sub = _server.listen((webSocket) {
-      _handleClient(webSocket);
-    });
+    _sub = _server.listen(_handleClient);
   }
 
   void _handleClient(WebSocket webSocket) {
-    PoloClient client = PoloClient._(webSocket, _registeredTypes, _middlewares);
+    final client = PoloClient._(webSocket, _registeredTypes, _middlewares);
     // On Client Connected
     _onConnect(client);
     // On Client Disconnected
@@ -79,21 +76,21 @@ class PoloServer {
 
   /// Sends message to all Clients
   void send<T>(String event, T data) {
-    for (PoloClient client in _clients.values) {
+    for (final client in _clients.values) {
       client.send<T>(event, data);
     }
   }
 
   /// Sends message to a Client by Id
   void sendToClient<T>(PoloClient client, String event, T data) {
-    if (_clients.containsKey(client)) {
-      _clients[client]!.send<T>(event, data);
+    if (_clients.containsKey(client.id)) {
+      _clients[client.id]!.send<T>(event, data);
     }
   }
 
   /// Sends message to a Room
   void sendToRoom<T>(String room, String event, T data) {
-    for (PoloClient client in _clients.values) {
+    for (final client in _clients.values) {
       if (client._rooms.contains(room)) {
         client.send<T>(event, data);
       }
@@ -102,7 +99,7 @@ class PoloServer {
 
   /// Broadcast from a Client to all other Clients
   void broadcastFrom<T>(PoloClient client, String event, T data) {
-    for (PoloClient clientL in _clients.values) {
+    for (final clientL in _clients.values) {
       if (clientL.id != client.id) {
         clientL.send<T>(event, data);
       }
@@ -111,11 +108,15 @@ class PoloServer {
 
   /// Broadcast from a Client to Room
   void broadcastToRoom<T>(
-      PoloClient client, String room, String event, T data) {
+    PoloClient client,
+    String room,
+    String event,
+    T data,
+  ) {
     // Sender Client must join the Room to Broadcast
     if (!client._rooms.contains(room)) return;
 
-    for (PoloClient clientL in _clients.values) {
+    for (final clientL in _clients.values) {
       if (clientL.id != client.id && clientL._rooms.contains(room)) {
         clientL.send<T>(event, data);
       }
