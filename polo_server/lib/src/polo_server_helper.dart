@@ -90,6 +90,8 @@ class Polo {
     return _namespaces[namespace]!;
   }
 
+  bool hasNamespace(String namespace) => _namespaces.containsKey(namespace);
+
   /// Closes all `PoloServer`'s of `Polo`
   Future<void> close() async {
     await _httpServer.close(force: true);
